@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chatbox</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    #chatBox {
+      width: 300px;
+      height: 80px;
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 10px;
+      margin-top: 20px;
+      overflow-y: auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #chatBox div {
+      margin-bottom: 10px;
+      padding: 5px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+    }
+
+    #messageInput {
+      width: 75%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    #sendButton {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #sendButton:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Simple Chatbox</h1>
+  <div id="chatBox"></div>
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <button id="sendButton">Send</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("https://your-app-name.cyclic.app"); // Replace with your Cyclic app's URL
+ // Automatically connects to the same domain and port
+
+    const chatBox = document.getElementById("chatBox");
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+
+    // Send message to the server
+    const sendMessage = () => {
+      const message = messageInput.value.trim();
+      if (message) {
+        socket.emit("chatMessage", message);
+        messageInput.value = "";
+      }
+    };
+
+    sendButton.addEventListener("click", sendMessage);
+
+    messageInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    // Receive and display messages
+    socket.on("chatMessage", (msg) => {
+      const messageElement = document.createElement("div");
+      messageElement.textContent = msg;
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to latest message
+    });
+
+    // Handle connection and disconnection
+    socket.on("connect", () => {
+      const messageElement = document.createElement("div");
+      messageElement.textContent = "You are connected!";
+      messageElement.style.color = "green";
+      chatBox.appendChild(messageElement);
+    });
+
+    socket.on("disconnect", () => {
+      const messageElement = document.createElement("div");
+      messageElement.textContent = "You have been disconnected!";
+      messageElement.style.color = "red";
+      chatBox.appendChild(messageElement);
+    });
+  </script>
+</body>
+
+</html>
